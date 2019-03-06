@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+import os
 
 # Scrapy settings for scraper project
 #
@@ -67,6 +68,10 @@ DOWNLOAD_DELAY = 1
 #ITEM_PIPELINES = {
 #    'scraper.pipelines.ScraperPipeline': 300,
 #}
+ITEM_PIPELINES = {'scrapy.pipelines.images.ImagesPipeline': 1}
+IMAGES_STORE = os.path.dirname(os.path.realpath('__file__'))
+IMAGES_URLS_FIELD = 'image_urls'
+IMAGES_RESULT_FIELD = 'images'
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See https://doc.scrapy.org/en/latest/topics/autothrottle.html
