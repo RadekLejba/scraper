@@ -8,7 +8,10 @@
 import scrapy
 
 
-class ScraperItem(scrapy.Item):
-    # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+class ShopItem(scrapy.Item):
+    name = scrapy.Field()
+    url = scrapy.Field()
+    new_price = scrapy.Field()
+    old_price = scrapy.Field()
+    rating = scrapy.Field()
+    features = scrapy.Field()
