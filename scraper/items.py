@@ -8,7 +8,14 @@
 import scrapy
 
 
+class ImageItem(scrapy.Item):
+    image_urls = scrapy.Field()
+    images = scrapy.Field()
+
+
 class ShopItem(scrapy.Item):
+    image_urls = scrapy.Field()
+    images = scrapy.Field()
     name = scrapy.Field()
     url = scrapy.Field()
     new_price = scrapy.Field()

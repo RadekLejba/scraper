@@ -8,32 +8,36 @@ from scraper.items import ShopItem
 
 fileDir = os.path.dirname(os.path.realpath('__file__'))
 RULES = {
-    "start_urls": ["https://www.morele.net/komputery/komputery-pc/komputery-dla-graczy-672/"],
+    "start_urls": ["https://www.x-kom.pl/g-12/c/442-klawiatury-przewodowe.html"],
     "allow": r"\.",
-    "xpath": "//li[@class='pagination-lg next']//a",
+    "xpath": "//div[@class='pagination ']//a[@class='next']",
     "deny": [],
 }
 
 ITEM = {
     # Container with item
-    'container': '//div[@class="cat-product card "]',
+    'container': '//div[@class="product-item product-impression"]',
     # Element with url to item page
     'url': {
-        'main': 'https:/www.morele.net',
-        'xpath': '//h2[@class="cat-product-name"]//a//@href',
+        'main': 'https:/www.x-kom.pl',
+        'xpath': 'a//@href',
     },
     # Element with item rating
-    'rating': '//div[@class="cat-product-sold"]//@data-tooltip',
+    'rating': 'div//a[@class="rating-bar text-nowrap js-scroll-top"]/@title',
     # Element with item features
-    'features': '//div[@class="cat-product-features"]',
+    'features': 'div//div[@class="features"]//ul//@title',
     # Element with item name
-    'name': '//h2[@class="cat-product-name"]//a//text()',
+    'name': 'div//a//@title',
     # Element with item price
-    'price': 'div//div[@class="price-new"]//text()',
+    'price': 'div//div[@class="prices"]//span[@class="price text-nowrap"]/text'
+             '()',
     # Element with optional old item price
-    'old_price': 'div//div[@class="price-old"]//text()',
+    'old_price': 'div//div[@class="prices"]//span[@class="previous-price text-'
+                 'nowrap"]/text()',
     # Element with optional new item price
-    'new_price': 'div//div[@class="price-new"]//text()',
+    'new_price': 'div//div[@class="prices"]//span[@class="price text-nowrapnew'
+                 '-price"]/text()',
+    'image': 'a//img//@src'
 }
 
 
@@ -68,37 +72,40 @@ class ItemSpider(CrawlSpider):
         items = response.xpath(ITEM['container'])
 
         for item in items:
-            try:
-                shop_item = ShopItem()
-                shop_item['url'] = (
-                    ITEM['url']['main'] +
-                    self.safe_list_get(
-                        item.xpath(ITEM['url']['xpath']).extract()
-                    )
+            shop_item = ShopItem()
+            shop_item['url'] = (
+                ITEM['url']['main'] +
+                self.safe_list_get(
+                    item.xpath(ITEM['url']['xpath']).extract()
                 )
-                shop_item['rating'] = self.safe_list_get(
-                    item.xpath(ITEM['rating']).extract()
+            )
+            shop_item['rating'] = self.safe_list_get(
+                item.xpath(ITEM['rating']).extract()
+            )
+            shop_item['features'] = (
+                self.safe_list_get(
+                    item.xpath(ITEM['features']).extract()
                 )
-                shop_item['features'] = (
-                    self.safe_list_get(
-                        item.xpath(ITEM['features']).extract()
-                    )
+            )
+            shop_item['name'] = self.safe_list_get(
+                item.xpath(ITEM['name']).extract()
+            )
+
+            if bool(item.xpath(ITEM['new_price'])):
+                shop_item['old_price'] = self.safe_list_get(
+                    item.xpath(ITEM['old_price']).extract()
                 )
-                shop_item['name'] = self.safe_list_get(
-                    item.xpath(ITEM['name']).extract()
+                shop_item['new_price'] = self.safe_list_get(
+                    item.xpath(ITEM['new_price']).extract()
                 )
-                if bool(item.xpath(ITEM['new_price'])):
-                    shop_item['old_price'] = self.safe_list_get(
-                        item.xpath(ITEM['old_price']).extract()
-                    )
-                    shop_item['new_price'] = self.safe_list_get(
-                        item.xpath(ITEM['new_price']).extract()
-                    )
-                else:
-                    shop_item['old_price'] = self.safe_list_get(
-                        item.xpath(ITEM['price']).extract()
-                    )
-            except IndexError:
-                pass
+            else:
+                shop_item['old_price'] = self.safe_list_get(
+                    item.xpath(ITEM['price']).extract()
+                )
+
+            if ITEM['image']:
+                shop_item['image_urls'] = [self.safe_list_get(
+                    item.xpath(ITEM['image']).extract()
+                )]
 
             yield shop_item
